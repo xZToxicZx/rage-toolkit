@@ -23,13 +23,15 @@ namespace RageLib.GTA5.RBFWrappers
 
         public void Export(RbfStructure value, Stream xmlFileStream)
         {
-            var writer = XmlWriter.Create(xmlFileStream, new XmlWriterSettings() { Indent = true, Encoding = Encoding.UTF8 });
-            writer.WriteStartDocument();
-            writer.WriteStartElement(value.Name);
-            WriteStructureContentXml(value, writer);
-            writer.WriteEndElement();
-            writer.WriteEndDocument();
-            writer.Flush();
+            using (var writer = XmlWriter.Create(xmlFileStream, new XmlWriterSettings() { Indent = true, Encoding = Encoding.UTF8 }))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement(value.Name);
+                WriteStructureContentXml(value, writer);
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+                writer.Flush();
+            }
         }
 
         private void WriteStructureContentXml(RbfStructure value, XmlWriter writer)

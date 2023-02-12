@@ -33,13 +33,15 @@ namespace RageLib.GTA5.PSOWrappers
         {
             var strctureValue = (PsoStructure)value;
 
-            var writer = new XmlRageWriter(XmlWriter.Create(xmlFileStream, new XmlWriterSettings() { Indent = true, Encoding = new UTF8Encoding(false), }));
-            writer.WriteStartDocument();
-            writer.WriteStartElement(GetNameForHash(strctureValue.entryIndexInfo.NameHash));
-            WriteStructureContentXml(writer, strctureValue);
-            writer.WriteEndElement();
-            writer.WriteEndDocument();
-            writer.Flush();
+            using (var writer = new XmlRageWriter(XmlWriter.Create(xmlFileStream, new XmlWriterSettings() { Indent = true, Encoding = new UTF8Encoding(false), })))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement(GetNameForHash(strctureValue.entryIndexInfo.NameHash));
+                WriteStructureContentXml(writer, strctureValue);
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+                writer.Flush();
+            }
         }
 
         private void WriteStructureContentXml(XmlWriter writer, PsoStructure value)
@@ -166,7 +168,7 @@ namespace RageLib.GTA5.PSOWrappers
                 case PsoString8:
                     WriteStringContent(writer, ((PsoString8)value).Value);
                     break;
-                
+
                 case PsoStructure:
                     WriteStructureContentXml(writer, (PsoStructure)value);
                     break;
@@ -236,7 +238,7 @@ namespace RageLib.GTA5.PSOWrappers
                     var value = ((PsoSByte)arrayEntry).Value;
                     writer.WriteString(value.ToString());
                 }
-                else if(arrayEntry is PsoByte)
+                else if (arrayEntry is PsoByte)
                 {
                     var value = ((PsoByte)arrayEntry).Value;
                     writer.WriteString(value.ToString());
@@ -348,7 +350,7 @@ namespace RageLib.GTA5.PSOWrappers
             foreach (var arrayEntry in entries)
             {
                 writer.WriteStartElement("Item");
-                
+
                 switch (arrayEntry)
                 {
                     case PsoStructure:
@@ -365,7 +367,7 @@ namespace RageLib.GTA5.PSOWrappers
                 writer.WriteEndElement();
             }
         }
-        
+
         private void WriteEnumContent(XmlWriter writer, PsoEnumInt8 value)
         {
             var matchingEnumEntry = (PsoEnumEntryInfo)null;
@@ -486,7 +488,7 @@ namespace RageLib.GTA5.PSOWrappers
             writer.WriteString(flagsString);
         }
 
-        
+
 
         private void WriteMapContent(XmlWriter writer, PsoMap value)
         {
@@ -531,7 +533,7 @@ namespace RageLib.GTA5.PSOWrappers
         {
             if (value == 0)
                 return;
-            
+
             writer.WriteString(GetNameForHash(value));
         }
 

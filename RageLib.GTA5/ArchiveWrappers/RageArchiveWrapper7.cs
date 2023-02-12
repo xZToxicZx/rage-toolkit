@@ -1,7 +1,6 @@
 ﻿// Copyright © Neodymium, carmineos and contributors. See LICENSE.md in the repository root for more information.
 
 using RageLib.Archives;
-using RageLib.Compression;
 using RageLib.Cryptography;
 using RageLib.Data;
 using RageLib.GTA5.Archives;
@@ -339,7 +338,7 @@ namespace RageLib.GTA5.ArchiveWrappers
         public static RageArchiveWrapper7 Create(Stream stream, string fileName, bool leaveOpen = false)
         {
             var arch = new RageArchiveWrapper7(stream, fileName, leaveOpen);
-            
+
             var rootD = new RageArchiveDirectory7();
             rootD.Name = "";
             arch.archive.Root = rootD;
@@ -367,7 +366,7 @@ namespace RageLib.GTA5.ArchiveWrappers
                     arch.archive.ReadHeader(GTA5Constants.PC_AES_KEY, null); // read...
                 }
 
-                
+
                 return arch;
             }
             catch
@@ -492,7 +491,7 @@ namespace RageLib.GTA5.ArchiveWrappers
         public IReadOnlyList<IArchiveDirectory> GetDirectories()
         {
             var directoryList = new List<IArchiveDirectory>();
-            
+
             foreach (var directory in directory.Directories)
                 directoryList.Add(new RageArchiveDirectoryWrapper7(archiveWrapper, directory));
 
@@ -716,9 +715,11 @@ namespace RageLib.GTA5.ArchiveWrappers
         /// </summary>
         public void Import(Stream stream)
         {
-            var binaryStream = GetStream();
-            binaryStream.SetLength(stream.Length);
-            stream.CopyTo(binaryStream, (int)stream.Length);
+            using (var binaryStream = GetStream())
+            {
+                binaryStream.SetLength(stream.Length);
+                stream.CopyTo(binaryStream, (int)stream.Length);
+            }
         }
 
         /// <summary>
@@ -735,8 +736,10 @@ namespace RageLib.GTA5.ArchiveWrappers
         /// </summary>
         public void Export(Stream stream)
         {
-            var binaryStream = GetStream();
-            binaryStream.CopyTo(stream);
+            using (var binaryStream = GetStream())
+            {
+                binaryStream.CopyTo(stream);
+            }
         }
 
         public void ExportUncompressed(string fileName)
@@ -782,9 +785,12 @@ namespace RageLib.GTA5.ArchiveWrappers
             // decompress...
             if (IsCompressed)
             {
-                var def = new DeflateStream(new MemoryStream(buf, 0, length), CompressionMode.Decompress);
-                bufnew = ArrayPool<byte>.Shared.Rent((int)uncompressedSize);
-                def.ReadExactly(bufnew, 0, (int)uncompressedSize);
+                using (var def = new DeflateStream(new MemoryStream(buf, 0, length), CompressionMode.Decompress))
+                {
+                    bufnew = ArrayPool<byte>.Shared.Rent((int)uncompressedSize);
+                    def.ReadExactly(bufnew, 0, (int)uncompressedSize);
+                }
+
                 buf = bufnew;
             }
 
@@ -817,7 +823,7 @@ namespace RageLib.GTA5.ArchiveWrappers
 
             // Get the buffer for the compressed file and copy the content
             compressedStream.Position = 0;
-            
+
             // Warning: Encryption whole binary file is overkill
             //          Specially with many nested RPF
             //          Don't use this unless you know what you are doing
@@ -881,21 +887,23 @@ namespace RageLib.GTA5.ArchiveWrappers
         /// </summary>
         public void Import(Stream stream)
         {
-            var resourceStream = archiveWrapper.GetStream(file);
-            resourceStream.SetLength(stream.Length);
+            using (var resourceStream = archiveWrapper.GetStream(file))
+            {
+                resourceStream.SetLength(stream.Length);
 
-            // read resource
-            var reader = new DataReader(stream);
-            reader.Position = 0;
-            var ident = reader.ReadUInt32();
-            var version = reader.ReadUInt32();
-            var systemFlags = reader.ReadUInt32();
-            var graphicsFlags = reader.ReadUInt32();
+                // read resource
+                var reader = new DataReader(stream);
+                reader.Position = 0;
+                var ident = reader.ReadUInt32();
+                var version = reader.ReadUInt32();
+                var systemFlags = reader.ReadUInt32();
+                var graphicsFlags = reader.ReadUInt32();
 
-            reader.Position = 0;
-            file.ResourceInfo = new DatResourceInfo(systemFlags, graphicsFlags);
+                reader.Position = 0;
+                file.ResourceInfo = new DatResourceInfo(systemFlags, graphicsFlags);
 
-            stream.CopyTo(resourceStream);
+                stream.CopyTo(resourceStream);
+            }
         }
 
         /// <summary>
@@ -918,10 +926,12 @@ namespace RageLib.GTA5.ArchiveWrappers
             writer.Write(file.ResourceInfo.VirtualFlags);
             writer.Write(file.ResourceInfo.PhysicalFlags);
 
-            var resourceStream = archiveWrapper.GetStream(file);
-            resourceStream.Position = 16;
+            using (var resourceStream = archiveWrapper.GetStream(file))
+            {
+                resourceStream.Position = 16;
 
-            resourceStream.CopyTo(stream, (int)resourceStream.Length - 16);
+                resourceStream.CopyTo(stream, (int)resourceStream.Length - 16);
+            }
         }
 
         /// <summary>

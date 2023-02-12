@@ -41,22 +41,23 @@ namespace RageLib.Cryptography
         /// </summary>
         public static byte[] Encrypt(byte[] data, byte[] key, int rounds = 1)
         {
-            var rijndael = Aes.Create();
-            rijndael.KeySize = 256;
-            rijndael.Key = key;
-            rijndael.BlockSize = 128;
-            rijndael.Mode = CipherMode.ECB;
-            rijndael.Padding = PaddingMode.None;
-
             var buffer = (byte[])data.Clone();
             var length = data.Length - data.Length % 16;
 
             // encrypt...
             if (length > 0)
             {
-                var encryptor = rijndael.CreateEncryptor();
-                for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
-                    encryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                using (var rijndael = Aes.Create())
+                {
+                    rijndael.KeySize = 256;
+                    rijndael.Key = key;
+                    rijndael.BlockSize = 128;
+                    rijndael.Mode = CipherMode.ECB;
+                    rijndael.Padding = PaddingMode.None;
+                    var encryptor = rijndael.CreateEncryptor();
+                    for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
+                        encryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                }
             }
 
             return buffer;
@@ -67,22 +68,24 @@ namespace RageLib.Cryptography
         /// </summary>
         public static byte[] Decrypt(byte[] data, byte[] key, int rounds = 1)
         {
-            var rijndael = Aes.Create();
-            rijndael.KeySize = 256;
-            rijndael.Key = key;
-            rijndael.BlockSize = 128;
-            rijndael.Mode = CipherMode.ECB;
-            rijndael.Padding = PaddingMode.None;
-
             var buffer = (byte[])data.Clone();
             var length = data.Length - data.Length % 16;
 
             // decrypt...
             if (length > 0)
             {
-                var decryptor = rijndael.CreateDecryptor();
-                for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
-                    decryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                using (var rijndael = Aes.Create())
+                {
+                    rijndael.KeySize = 256;
+                    rijndael.Key = key;
+                    rijndael.BlockSize = 128;
+                    rijndael.Mode = CipherMode.ECB;
+                    rijndael.Padding = PaddingMode.None;
+
+                    var decryptor = rijndael.CreateDecryptor();
+                    for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
+                        decryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                }
             }
 
             return buffer;
@@ -91,24 +94,26 @@ namespace RageLib.Cryptography
 
         public static void EncryptData(Span<byte> data, byte[] key, int rounds = 1)
         {
-            var rijndael = Aes.Create();
-            rijndael.KeySize = 256;
-            rijndael.Key = key;
-            rijndael.BlockSize = 128;
-            rijndael.Mode = CipherMode.ECB;
-            rijndael.Padding = PaddingMode.None;
-
             var buffer = ArrayPool<byte>.Shared.Rent(data.Length);
             data.CopyTo(buffer);
-            
+
             var length = data.Length - data.Length % 16;
-            
+
             // encrypt...
             if (length > 0)
             {
-                var encryptor = rijndael.CreateEncryptor();
-                for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
-                    encryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                using (var rijndael = Aes.Create())
+                {
+                    rijndael.KeySize = 256;
+                    rijndael.Key = key;
+                    rijndael.BlockSize = 128;
+                    rijndael.Mode = CipherMode.ECB;
+                    rijndael.Padding = PaddingMode.None;
+
+                    var encryptor = rijndael.CreateEncryptor();
+                    for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
+                        encryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                }
             }
 
             buffer.AsSpan(0, length).CopyTo(data);
@@ -117,13 +122,6 @@ namespace RageLib.Cryptography
 
         public static void DecryptData(Span<byte> data, byte[] key, int rounds = 1)
         {
-            var rijndael = Aes.Create();
-            rijndael.KeySize = 256;
-            rijndael.Key = key;
-            rijndael.BlockSize = 128;
-            rijndael.Mode = CipherMode.ECB;
-            rijndael.Padding = PaddingMode.None;
-
             var buffer = ArrayPool<byte>.Shared.Rent(data.Length);
             data.CopyTo(buffer);
 
@@ -132,9 +130,18 @@ namespace RageLib.Cryptography
             // decrypt...
             if (length > 0)
             {
-                var decryptor = rijndael.CreateDecryptor();
-                for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
-                    decryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                using (var rijndael = Aes.Create())
+                {
+                    rijndael.KeySize = 256;
+                    rijndael.Key = key;
+                    rijndael.BlockSize = 128;
+                    rijndael.Mode = CipherMode.ECB;
+                    rijndael.Padding = PaddingMode.None;
+
+                    var decryptor = rijndael.CreateDecryptor();
+                    for (var roundIndex = 0; roundIndex < rounds; roundIndex++)
+                        decryptor.TransformBlock(buffer, 0, length, buffer, 0);
+                }
             }
 
             buffer.AsSpan(0, length).CopyTo(data);

@@ -308,6 +308,7 @@ namespace RageLib.GTA5.Archives
             ent_str.Flush();
 
             var ent_buf = ent_str.GetBuffer().AsSpan(0, (int)ent_str.Length);
+            ent_str.Dispose();
 
             if (Encryption == RageArchiveEncryption7.AES)
             {
@@ -331,6 +332,7 @@ namespace RageLib.GTA5.Archives
             n_str.Flush();
 
             var n_buf = n_str.GetBuffer().AsSpan(0, (int)n_str.Length);
+            n_str.Dispose();
 
             if (Encryption == RageArchiveEncryption7.AES)
             {

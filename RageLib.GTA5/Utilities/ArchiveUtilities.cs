@@ -57,10 +57,10 @@ namespace RageLib.GTA5.Utilities
             {
                 var path = Path.Combine(fullPathName, file.Name);
                 processDelegate(path, file, encryption);
-                if ((file is IArchiveBinaryFile) && file.Name.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                if ((file is IArchiveBinaryFile binaryFile) && file.Name.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
                 {
-                    var fileStream = ((IArchiveBinaryFile)file).GetStream();
-                    var inputArchive = RageArchiveWrapper7.Open(fileStream, file.Name);
+                    using var fileStream = binaryFile.GetStream();
+                    using var inputArchive = RageArchiveWrapper7.Open(fileStream, file.Name);
                     ForEachFile(path, inputArchive.Root, inputArchive.Encryption, processDelegate);
                 }
             }

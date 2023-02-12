@@ -104,6 +104,9 @@ namespace RageLib.Resources.GTA5
             resourceStream.Position = 0x50000000;
 
             ResourceData = resourceStream.ReadBlock<T>();           
+
+            systemStream.Dispose();
+            graphicsStream.Dispose();
         }
 
         public override void Save(Stream stream)
@@ -173,7 +176,7 @@ namespace RageLib.Resources.GTA5
             var pgBase = (PgBase64)rootBlock;
 
             // If we are building a new resource
-            if(pgBase.PageMap is null)
+            if (pgBase.PageMap is null)
             {
                 pgBase.PageMap = new DatResourceMap(64, 64);
                 systemBlocks.Add(pgBase.PageMap);
